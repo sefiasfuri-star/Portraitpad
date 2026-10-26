@@ -1,0 +1,19 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen
+      - name: Build Mac app
+        run: xcodebuild -project PortraitPad.xcodeproj -target PortraitPadHost -configuration Debug CODE_SIGNING_ALLOWED=NO build
+      - name: Build iPad app
+        run: xcodebuild -project PortraitPad.xcodeproj -target PortraitPad -configuration Debug -sdk iphoneos CODE_SIGNING_ALLOWED=NO build

@@ -1,0 +1,57 @@
+# Generates PortraitPad.xcodeproj. Run `xcodegen` in this folder (see README).
+name: PortraitPad
+options:
+  deploymentTarget:
+    macOS: "13.0"
+    iOS: "16.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  PortraitPadHost:
+    type: application
+    platform: macOS
+    sources: [Mac, Shared]
+    scheme: {}
+    settings:
+      base:
+        PRODUCT_NAME: PortraitPad Host
+        PRODUCT_BUNDLE_IDENTIFIER: com.sefi.portraitpad.host
+        SWIFT_OBJC_BRIDGING_HEADER: Mac/CGVirtualDisplay.h
+        # Needs to reach usbmuxd and post mouse events, which the sandbox forbids.
+        ENABLE_APP_SANDBOX: NO
+        ENABLE_HARDENED_RUNTIME: NO
+    info:
+      path: Support/Mac-Info.plist
+      properties:
+        CFBundleDisplayName: PortraitPad Host
+        LSUIElement: true
+        LSApplicationCategoryType: public.app-category.utilities
+        NSLocalNetworkUsageDescription: PortraitPad Host connects to the PortraitPad app on your iPad over Wi-Fi.
+        NSBonjourServices: [_portraitpad._tcp]
+  PortraitPad:
+    type: application
+    platform: iOS
+    sources: [iPad, Shared]
+    scheme: {}
+    settings:
+      base:
+        PRODUCT_NAME: PortraitPad
+        PRODUCT_BUNDLE_IDENTIFIER: com.sefi.portraitpad.viewer
+        TARGETED_DEVICE_FAMILY: "2"
+    info:
+      path: Support/iPad-Info.plist
+      properties:
+        CFBundleDisplayName: PortraitPad
+        UILaunchScreen: {}
+        UIRequiresFullScreen: true
+        UIStatusBarHidden: true
+        UISupportedInterfaceOrientations~ipad: [UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown]
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown]
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        NSLocalNetworkUsageDescription: PortraitPad receives your Mac's screen over Wi-Fi.
+        NSBonjourServices: [_portraitpad._tcp]
