@@ -7,6 +7,8 @@ final class VideoView: UIView {
     /// Positions are normalized 0...1 within the picture.
     var onPointer: ((PointerPhase, CGPoint) -> Void)?
     var onScroll: ((CGPoint, CGPoint) -> Void)?
+    /// Pixel size of the incoming picture (portrait or landscape). Set on the main thread.
+    var videoSize = UIScreen.main.nativeBounds.size
 
     override class var layerClass: AnyClass { AVSampleBufferDisplayLayer.self }
 
@@ -103,8 +105,7 @@ final class VideoView: UIView {
 
     /// Maps a point in the view to 0...1 within the (aspect-fit) picture.
     private func normalized(_ p: CGPoint) -> CGPoint {
-        let native = UIScreen.main.nativeBounds.size
-        let rect = AVMakeRect(aspectRatio: native, insideRect: bounds)
+        let rect = AVMakeRect(aspectRatio: videoSize, insideRect: bounds)
         guard rect.width > 0, rect.height > 0 else { return .zero }
         return CGPoint(x: min(max((p.x - rect.minX) / rect.width, 0), 1),
                        y: min(max((p.y - rect.minY) / rect.height, 0), 1))

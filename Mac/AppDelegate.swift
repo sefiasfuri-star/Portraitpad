@@ -56,6 +56,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         wifi.state = host.wifiEnabled ? .on : .off
         menu.addItem(wifi)
 
+        let orientationMenu = NSMenu()
+        for (name, isLandscape) in [("Portrait", false), ("Landscape", true)] {
+            let i = item(name, #selector(setOrientation(_:)))
+            i.tag = isLandscape ? 1 : 0
+            i.state = host.landscape == isLandscape ? .on : .off
+            orientationMenu.addItem(i)
+        }
+        let orientationItem = NSMenuItem(title: "Orientation", action: nil, keyEquivalent: "")
+        orientationItem.submenu = orientationMenu
+        menu.addItem(orientationItem)
+
         let fpsMenu = NSMenu()
         for fps in [30, 60] {
             let i = item("\(fps) fps", #selector(setFPS(_:)))
@@ -99,6 +110,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func toggleWifi() {
         host.wifiEnabled.toggle()
+    }
+
+    @objc private func setOrientation(_ sender: NSMenuItem) {
+        host.landscape = sender.tag == 1
     }
 
     @objc private func setFPS(_ sender: NSMenuItem) {

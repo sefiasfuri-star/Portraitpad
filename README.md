@@ -74,6 +74,8 @@ open Products/Debug, and drag **PortraitPad Host** into your Applications folder
 
 - **Control Mac from iPad touches**: off by default. Turning it on asks for the
   Accessibility permission (System Settings > Privacy & Security > Accessibility).
+- **Orientation**: Portrait (default) or Landscape. The Mac rebuilds the screen in the new
+  shape within a second or two; turn the iPad to match and the picture follows it.
 - **Use Wi-Fi when no cable is connected**: on by default. The cable is always preferred.
 - **Frame rate**: 60 fps is smoother, 30 fps uses a bit less power.
 - **Quality**: High is the default. Use Best over USB for the sharpest moving image.

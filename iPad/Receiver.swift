@@ -121,6 +121,11 @@ final class Receiver: ObservableObject {
         switch type {
         case .format:
             format = Self.makeFormat(payload)
+            if let format {
+                let dimensions = CMVideoFormatDescriptionGetDimensions(format)
+                let size = CGSize(width: Int(dimensions.width), height: Int(dimensions.height))
+                DispatchQueue.main.async { self.videoView.videoSize = size }
+            }
         case .frame:
             guard let format, let sample = Self.makeSample(payload, format: format) else { return }
             if !videoView.enqueue(sample) {

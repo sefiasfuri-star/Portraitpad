@@ -25,6 +25,14 @@ final class HostController {
         set { UserDefaults.standard.set(newValue, forKey: "bitrate"); restartStream() }
     }
 
+    var landscape: Bool {
+        get { UserDefaults.standard.bool(forKey: "landscape") }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "landscape")
+            if let hello { setUpDisplay(for: hello) }
+        }
+    }
+
     var wifiEnabled: Bool {
         get { UserDefaults.standard.object(forKey: "wifiEnabled") as? Bool ?? true }
         set { UserDefaults.standard.set(newValue, forKey: "wifiEnabled"); connections.wifiEnabled = newValue }
@@ -101,17 +109,25 @@ final class HostController {
         }
     }
 
+    /// The virtual screen's pixel size: the iPad's own size, turned sideways for landscape.
+    private func screenSize(for hello: Hello) -> (width: Int, height: Int) {
+        landscape ? (hello.pixelHeight, hello.pixelWidth) : (hello.pixelWidth, hello.pixelHeight)
+    }
+
     private func setUpDisplay(for hello: Hello) {
         displayRemoval?.cancel()
         displayRemoval = nil
 
-        if let display, display.pixelWidth == hello.pixelWidth, display.pixelHeight == hello.pixelHeight {
+        let size = screenSize(for: hello)
+        if let display, display.pixelWidth == size.width, display.pixelHeight == size.height {
             restartStream()
             return
         }
 
+        streamer?.stop()
+        streamer = nil
         display = nil
-        guard let display = VirtualDisplay(pixelWidth: hello.pixelWidth, pixelHeight: hello.pixelHeight, ppi: hello.ppi) else {
+        guard let display = VirtualDisplay(pixelWidth: size.width, pixelHeight: size.height, ppi: hello.ppi) else {
             status = "Couldn't create the virtual display"
             return
         }
@@ -141,25 +157,22 @@ final class HostController {
         self.streamer = streamer
         injector.displayID = display.displayID
 
-        let route = self.route
-        let summary = "Streaming via \(route.rawValue) — \(hello.pixelWidth)×\(hello.pixelHeight) to \(hello.name)"
-        Task { [weak self] in
+        let orientation = landscape ? "landscape" : "portrait"
+        let summary = "Streaming via \(route.rawValue) — \(orientation) to \(hello.name)"
+        let (fps, bitrate) = (self.fps, self.bitrate)
+        Task { @MainActor [weak self] in
             do {
-                try await streamer.start(displayID: display.displayID, width: hello.pixelWidth,
-                                         height: hello.pixelHeight, fps: self?.fps ?? 60,
-                                         bitrate: self?.bitrate ?? 20_000_000)
-                await MainActor.run {
-                    // Settings may have changed while this was starting up.
-                    if self?.streamer !== streamer { streamer.stop() } else { self?.status = summary }
-                }
+                try await streamer.start(displayID: display.displayID, width: display.pixelWidth,
+                                         height: display.pixelHeight, fps: fps, bitrate: bitrate)
+                // Settings may have changed while this was starting up.
+                guard let self, self.streamer === streamer else { return streamer.stop() }
+                self.status = summary
             } catch {
-                await MainActor.run {
-                    NSLog("PortraitPad capture failed: \(error)")
-                    guard self?.streamer === streamer else { return }
-                    self?.status = error is StreamerError
-                        ? error.localizedDescription
-                        : "Allow Screen Recording for PortraitPad Host (System Settings > Privacy & Security), then quit and reopen it"
-                }
+                NSLog("PortraitPad capture failed: \(error)")
+                guard let self, self.streamer === streamer else { return }
+                self.status = error is StreamerError
+                    ? error.localizedDescription
+                    : "Allow Screen Recording for PortraitPad Host (System Settings > Privacy & Security), then quit and reopen it"
             }
         }
     }
