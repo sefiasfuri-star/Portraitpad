@@ -30,8 +30,8 @@ It connects over the **USB cable** (preferred, lowest latency) or over **Wi-Fi**
 
    ```sh
    cd ~/Documents
-   git clone https://github.com/<your-user>/portraitpad.git
-   cd portraitpad
+   git clone https://github.com/sefiasfuri-star/Portraitpad.git
+   cd Portraitpad
    xcodegen
    open PortraitPad.xcodeproj
    ```
