@@ -7,21 +7,22 @@ set -uo pipefail
 
 MODE="${1:-install}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BUILD="$ROOT/build"
+# Build outside Documents: iCloud/Dropbox sync tags files there, and code signing rejects that.
+BUILD="$HOME/Library/Caches/PortraitPad/build"
 cd "$ROOT"
 
 step() { printf '\n\033[1m== %s\033[0m\n' "$1"; }
 fail() { printf '\n\033[31m%s\033[0m\n' "$1"; exit 1; }
 ok() { printf '   \033[32m✓\033[0m %s\n' "$1"; }
 
-mkdir -p "$BUILD"
+mkdir -p "$BUILD" && xattr -cr "$ROOT/Support" 2>/dev/null
 LOG="$BUILD/last-build.log"
 
 # Runs xcodebuild quietly; on failure shows the lines that explain why.
 build() {
     if ! xcodebuild "$@" >"$LOG" 2>&1; then
         echo
-        grep -E "error:|Error |failed|requires|No Account|No profiles|not found" "$LOG" | sort -u | head -n 15
+        grep -E "error:|Error |failed|requires|No Account|No profiles|not found|detritus" "$LOG" | sort -u | head -n 15
         echo "(Full log: $LOG)"
         return 1
     fi
