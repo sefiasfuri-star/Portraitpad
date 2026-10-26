@@ -13,6 +13,14 @@ cd "$ROOT"
 step() { printf '\n\033[1m== %s\033[0m\n' "$1"; }
 fail() { printf '\n\033[31m%s\033[0m\n' "$1"; exit 1; }
 
+# Use the full Xcode even if the Mac is set to the smaller "Command Line Tools".
+if ! xcodebuild -version >/dev/null 2>&1; then
+    XCODE_APP=$(ls -d /Applications/Xcode*.app 2>/dev/null | head -n 1)
+    [ -n "$XCODE_APP" ] || XCODE_APP=$(mdfind "kMDItemCFBundleIdentifier == 'com.apple.dt.Xcode'" 2>/dev/null | head -n 1)
+    [ -n "$XCODE_APP" ] || fail "Xcode isn't installed. Install it from the App Store and open it once."
+    export DEVELOPER_DIR="$XCODE_APP/Contents/Developer"
+fi
+
 if [ "$MODE" = "install" ]; then
     step "Getting the latest version"
     git pull --ff-only || echo "(Couldn't update; using the copy you have.)"
