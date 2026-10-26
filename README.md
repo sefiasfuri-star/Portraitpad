@@ -45,33 +45,36 @@ It connects over the **USB cable** (preferred, lowest latency) or over **Wi-Fi**
    then on the iPad go to Settings > Privacy & Security > Developer Mode, switch it on, and
    restart when asked.
 
-## Install the iPad app
+## Install both apps (no Xcode window needed)
 
-1. In Xcode's toolbar, pick the **PortraitPad** scheme and choose your iPad as the device.
-2. Press **Run** (the ▶ button).
-3. The first time, the iPad says the developer isn't trusted: go to Settings > General >
-   VPN & Device Management, tap your Apple ID, and tap **Trust**. Then press Run again.
-4. When the iPad asks to find devices on your local network, tap **Allow**.
+Plug the iPad in with the cable and unlock it, then in Finder open the `Portraitpad` folder
+and double-click **Install or Update.command**. It builds both apps, puts **PortraitPad
+Host** in Applications (set to open at login), and installs the iPad app.
 
-> With a free Apple ID, iPad apps installed from Xcode stop opening after 7 days. Just
-> plug in and press Run again to renew. A paid developer account makes it last a year.
+The first time only:
+- On the iPad, trust your developer certificate: Settings > General > VPN & Device
+  Management > your Apple ID > Trust. Turn on Developer Mode if the iPad asks.
+- On the Mac, allow **Screen Recording** for PortraitPad Host (System Settings > Privacy &
+  Security > Screen & System Audio Recording), then quit it from its menu and open it again
+  from Applications.
 
-## Run the Mac app
+## Everyday use
 
-1. Pick the **PortraitPadHost** scheme, with "My Mac" as the device, and press **Run**.
-   An iPad icon appears in the menu bar.
-2. Open PortraitPad on the iPad with the cable connected. The Mac asks for **Screen
-   Recording** permission: allow it in System Settings > Privacy & Security > Screen &
-   System Audio Recording, then quit PortraitPad Host from its menu and run it again.
-3. The iPad now shows a new portrait screen. Use **Arrange Displays…** in the menu to put
-   it to the left or right of your MacBook screen, the same as any monitor. macOS
-   remembers the position.
+1. Plug the iPad in and open **PortraitPad** on it.
+2. That's it. PortraitPad Host is already running in the menu bar, and the screen appears.
 
-To use it without Xcode afterwards: in Xcode choose Product > Show Build Folder in Finder,
-open Products/Debug, and drag **PortraitPad Host** into your Applications folder.
+When you unplug, macOS moves the windows back after a few seconds. Nothing else runs in the
+background while the iPad isn't connected, apart from a check for the cable every two seconds.
+
+**Every 7 days** (free Apple ID): if the iPad app won't open, plug in and double-click
+**Refresh iPad.command**. It takes about a minute.
+
+To arrange the screen next to your MacBook, use **Arrange Displays…** in the menu. macOS
+remembers the position.
 
 ## Menu options
 
+- **Open at Login**: on by default for the copy in Applications.
 - **Control Mac from iPad touches**: off by default. Turning it on asks for the
   Accessibility permission (System Settings > Privacy & Security > Accessibility).
 - **Orientation**: Portrait (default) or Landscape. The Mac rebuilds the screen in the new

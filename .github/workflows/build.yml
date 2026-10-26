@@ -9,6 +9,8 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+      - name: Check scripts
+        run: bash -n scripts/portraitpad.sh
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate Xcode project

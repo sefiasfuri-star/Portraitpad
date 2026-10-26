@@ -1,4 +1,5 @@
 import AppKit
+import ServiceManagement
 
 @main
 enum PortraitPadHostMain {
@@ -34,6 +35,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             self?.statusItem.button?.appearsDisabled = !text.hasPrefix("Streaming")
         }
         host.start()
+        enableOpenAtLoginOnFirstRun()
+    }
+
+    /// The installed copy starts with the Mac by default, so it's simply there when the iPad is
+    /// plugged in. Builds run from Xcode don't register themselves.
+    private func enableOpenAtLoginOnFirstRun() {
+        let key = "openAtLoginConfigured"
+        guard Bundle.main.bundlePath.hasPrefix("/Applications/"),
+              !UserDefaults.standard.bool(forKey: key) else { return }
+        UserDefaults.standard.set(true, forKey: key)
+        try? SMAppService.mainApp.register()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -90,6 +102,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(qualityItem)
 
         menu.addItem(.separator())
+        let login = item("Open at Login", #selector(toggleOpenAtLogin))
+        login.state = SMAppService.mainApp.status == .enabled ? .on : .off
+        menu.addItem(login)
         menu.addItem(item("Arrange Displays…", #selector(openDisplaySettings)))
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: "Quit PortraitPad Host", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
@@ -105,6 +120,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         host.touchEnabled.toggle()
         if host.touchEnabled && !InputInjector.hasPermission {
             InputInjector.requestPermission()
+        }
+    }
+
+    @objc private func toggleOpenAtLogin() {
+        if SMAppService.mainApp.status == .enabled {
+            try? SMAppService.mainApp.unregister()
+        } else {
+            try? SMAppService.mainApp.register()
         }
     }
 
