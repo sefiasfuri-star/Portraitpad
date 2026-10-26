@@ -43,8 +43,8 @@ final class VirtualDisplay {
 
         let settings = CGVirtualDisplaySettings()
         settings.hiDPI = 1
-        var modes = sizes.map { CGVirtualDisplayMode(width: $0.0, height: $0.1, refreshRate: 60) }
-        modes.append(CGVirtualDisplayMode(width: pixelWidth, height: pixelHeight, refreshRate: 60))
+        var modes = sizes.map { CGVirtualDisplayMode(width: UInt($0.0), height: UInt($0.1), refreshRate: 60) }
+        modes.append(CGVirtualDisplayMode(width: UInt(pixelWidth), height: UInt(pixelHeight), refreshRate: 60))
         settings.modes = modes
         guard display.apply(settings) else { return nil }
     }

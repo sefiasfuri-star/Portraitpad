@@ -14,6 +14,7 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen
       - name: Build Mac app
-        run: xcodebuild -project PortraitPad.xcodeproj -target PortraitPadHost -configuration Debug CODE_SIGNING_ALLOWED=NO build
+        run: xcodebuild -project PortraitPad.xcodeproj -target PortraitPadHost -configuration Debug CODE_SIGNING_ALLOWED=NO -quiet build
       - name: Build iPad app
-        run: xcodebuild -project PortraitPad.xcodeproj -target PortraitPad -configuration Debug -sdk iphoneos CODE_SIGNING_ALLOWED=NO build
+        if: always()
+        run: xcodebuild -project PortraitPad.xcodeproj -target PortraitPad -configuration Debug -sdk iphoneos CODE_SIGNING_ALLOWED=NO -quiet build
