@@ -48,6 +48,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         try? SMAppService.mainApp.register()
     }
 
+    /// Opening the app again (from Applications, Launchpad or Spotlight) shows its menu at the
+    /// pointer, for when the menu bar icon is hidden behind the notch or too many other icons.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        NSApp.activate(ignoringOtherApps: true)
+        statusItem.menu?.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+        return false
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         host.stop()
     }
