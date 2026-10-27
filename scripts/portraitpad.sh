@@ -97,7 +97,7 @@ if [ "$MODE" = "install" ]; then
     osascript -e 'quit app "PortraitPad Host"' >/dev/null 2>&1
     sleep 1
     rm -rf "/Applications/PortraitPad Host.app"
-    cp -R "$BUILD/Build/Products/Release/PortraitPad Host.app" /Applications/ || fail "Couldn't copy the app to Applications."
+    mv "$BUILD/Build/Products/Release/PortraitPad Host.app" /Applications/ || fail "Couldn't move the app to Applications."
     open "/Applications/PortraitPad Host.app"
 fi
 
