@@ -7,7 +7,7 @@ enum PortraitPadHostMain {
         let app = NSApplication.shared
         let delegate = AppDelegate()
         app.delegate = delegate
-        app.setActivationPolicy(.accessory) // menu bar only, no Dock icon
+        app.setActivationPolicy(.regular) // Dock icon plus the menu bar icon
         withExtendedLifetime(delegate) { app.run() }
     }
 }
@@ -15,7 +15,6 @@ enum PortraitPadHostMain {
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let host = HostController()
     private var statusItem: NSStatusItem!
-    private let statusLine = NSMenuItem(title: "", action: nil, keyEquivalent: "")
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -30,7 +29,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusItem.menu = menu
 
         host.onStatusChange = { [weak self] text in
-            self?.statusLine.title = text
             // Dimmed icon while not streaming.
             self?.statusItem.button?.appearsDisabled = !text.hasPrefix("Streaming")
         }
@@ -48,12 +46,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         try? SMAppService.mainApp.register()
     }
 
-    /// Opening the app again (from Applications, Launchpad or Spotlight) shows its menu at the
-    /// pointer, for when the menu bar icon is hidden behind the notch or too many other icons.
+    /// Clicking the Dock icon, or opening the app again from Applications or Spotlight, shows its
+    /// menu at the pointer (the menu bar icon can be hidden behind the notch).
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         NSApp.activate(ignoringOtherApps: true)
         statusItem.menu?.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
         return false
+    }
+
+    /// The same menu on right-click (or click-and-hold) on the Dock icon.
+    func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
+        let menu = NSMenu()
+        menuNeedsUpdate(menu)
+        return menu
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -63,8 +68,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // Rebuilt every time it opens so checkmarks are current.
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
+        let statusLine = NSMenuItem(title: host.status, action: nil, keyEquivalent: "")
         statusLine.isEnabled = false
-        statusLine.title = host.status
         menu.addItem(statusLine)
         menu.addItem(.separator())
 

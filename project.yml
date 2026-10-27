@@ -20,6 +20,7 @@ targets:
       base:
         PRODUCT_NAME: PortraitPad Host
         PRODUCT_BUNDLE_IDENTIFIER: com.sefi.portraitpad.host
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_OBJC_BRIDGING_HEADER: Mac/CGVirtualDisplay.h
         # Needs to reach usbmuxd and post mouse events, which the sandbox forbids.
         ENABLE_APP_SANDBOX: NO
@@ -28,7 +29,6 @@ targets:
       path: Support/Mac-Info.plist
       properties:
         CFBundleDisplayName: PortraitPad Host
-        LSUIElement: true
         LSApplicationCategoryType: public.app-category.utilities
         NSLocalNetworkUsageDescription: PortraitPad Host connects to the PortraitPad app on your iPad over Wi-Fi.
         NSBonjourServices: [_portraitpad._tcp]
@@ -41,6 +41,7 @@ targets:
       base:
         PRODUCT_NAME: PortraitPad
         PRODUCT_BUNDLE_IDENTIFIER: com.sefi.portraitpad.viewer
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "2"
     info:
       path: Support/iPad-Info.plist
