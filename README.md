@@ -72,6 +72,25 @@ background while the iPad isn't connected, apart from a check for the cable ever
 To arrange the screen next to your MacBook, use **Arrange Displays…** in the menu. macOS
 remembers the position.
 
+## Bonus: control the iPad itself with the Mac's trackpad
+
+When you leave the PortraitPad app on the iPad (back to the home screen), you can push the
+Mac's pointer past the edge of the MacBook screen and it appears on the iPad. There you can
+click, open apps, scroll and use trackpad gestures, and type with the Mac keyboard.
+
+That is Apple's **Universal Control**, built into macOS and iPadOS, not part of PortraitPad.
+It takes over whenever the iPad isn't showing the PortraitPad screen. Open PortraitPad again
+and the iPad goes back to being a second Mac screen.
+
+If it stops working, check that:
+- both are signed in to the same Apple ID, with Wi-Fi and Bluetooth on;
+- on the Mac: System Settings > Displays > Advanced > "Allow your pointer and keyboard to move
+  between any nearby Mac or iPad" is on;
+- on the iPad: Settings > General > AirPlay & Continuity > Cursor and Keyboard is on.
+
+The pointer enters the iPad from the side where macOS places it. You can drag the iPad's
+position in System Settings > Displays (Arrange).
+
 ## Menu options
 
 - **Open at Login**: on by default for the copy in Applications.
