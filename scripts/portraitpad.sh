@@ -112,9 +112,37 @@ xcrun devicectl device install app --device "$DEVICE" \
     "$BUILD/Build/Products/Release-iphoneos/PortraitPad.app" >"$LOG" 2>&1 \
     || { tail -n 8 "$LOG"; fail "Couldn't install on the iPad. Is it unlocked?"; }
 xcrun devicectl device process launch --device "$DEVICE" com.sefi.portraitpad.viewer >/dev/null 2>&1
+# The Mac app shows the days left and puts a "!" on its Dock icon on the last day.
+# The free profile can be older than today's build, so read its real expiry date.
+EXPIRES=$(security cms -D -i "$BUILD/Build/Products/Release-iphoneos/PortraitPad.app/embedded.mobileprovision" 2>/dev/null \
+    | plutil -extract ExpirationDate raw -o - - 2>/dev/null)
+EXPIRES_AT=$(date -j -u -f "%Y-%m-%dT%H:%M:%SZ" "$EXPIRES" +%s 2>/dev/null || echo $(( $(date +%s) + 7 * 86400 )))
+defaults write com.sefi.portraitpad.host iPadExpiresAt -float "$EXPIRES_AT"
+
+# A small "Refresh iPad" app you can keep in the Dock: it opens Terminal and runs this script.
+make_refresh_app() {
+    local app="/Applications/Refresh iPad.app"
+    local cmd="$ROOT/Refresh iPad.command"
+    local src="$BUILD/RefreshIPad.applescript"
+    printf 'do shell script "open -a Terminal " & quoted form of "%s"\n' "$cmd" >"$src"
+    [ -d "$app" ] && return 0 # keep the same app so a Dock pin keeps working
+    osacompile -o "$app" "$src" >/dev/null 2>&1 || return 1
+    local icon="/Applications/PortraitPad Host.app/Contents/Resources/AppIcon.icns"
+    [ -f "$icon" ] && cp "$icon" "$app/Contents/Resources/applet.icns"
+    xattr -cr "$app" 2>/dev/null
+    codesign --force --sign - "$app" >/dev/null 2>&1
+    touch "$app"
+}
+NEW_REFRESH_APP=no
+[ -d "/Applications/Refresh iPad.app" ] || NEW_REFRESH_APP=yes
+make_refresh_app || echo "(Couldn't create the Refresh iPad app; the .command file still works.)"
 
 step "Done"
 if [ "$MODE" = "install" ]; then
     echo "PortraitPad Host is in Applications and opens by itself when you log in."
 fi
-echo "The iPad app is good for the next 7 days."
+echo "The iPad app is good until $(date -r "$EXPIRES_AT" "+%A %-d %B, %H:%M")."
+if [ "$NEW_REFRESH_APP" = "yes" ]; then
+    echo "Next time, open \"Refresh iPad\" (in Applications, or drag it to the Dock)."
+    open -R "/Applications/Refresh iPad.app"
+fi

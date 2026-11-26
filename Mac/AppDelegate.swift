@@ -34,6 +34,47 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         host.start()
         enableOpenAtLoginOnFirstRun()
+        updateRefreshBadge()
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: 3600, repeats: true) { [weak self] _ in
+            self?.updateRefreshBadge()
+        }
+    }
+
+    // MARK: 7-day iPad renewal
+
+    private var refreshTimer: Timer?
+    private static let refreshApp = URL(fileURLWithPath: "/Applications/Refresh iPad.app")
+
+    /// When the free signing on the iPad app runs out. Written by scripts/portraitpad.sh.
+    private var hoursLeftOnIPad: Double? {
+        let stamp = UserDefaults.standard.double(forKey: "iPadExpiresAt")
+        guard stamp > 0 else { return nil }
+        return (stamp - Date().timeIntervalSince1970) / 3600
+    }
+
+    /// A red "!" on the Dock icon during the last day, so the renewal isn't forgotten.
+    private func updateRefreshBadge() {
+        let due = (hoursLeftOnIPad ?? .infinity) < 24
+        NSApp.dockTile.badgeLabel = due ? "!" : nil
+    }
+
+    private var refreshTitle: String {
+        guard let hours = hoursLeftOnIPad else { return "Refresh iPad App…" }
+        if hours <= 0 { return "Refresh iPad App… (expired)" }
+        if hours < 24 { return "Refresh iPad App… (expires today)" }
+        let days = Int(hours / 24)
+        return "Refresh iPad App… (\(days) day\(days == 1 ? "" : "s") left)"
+    }
+
+    @objc private func refreshIPad() {
+        if FileManager.default.fileExists(atPath: Self.refreshApp.path) {
+            NSWorkspace.shared.open(Self.refreshApp)
+        } else {
+            let alert = NSAlert()
+            alert.messageText = "Run “Install or Update” once"
+            alert.informativeText = "It adds the Refresh iPad app to Applications."
+            alert.runModal()
+        }
     }
 
     /// The installed copy starts with the Mac by default, so it's simply there when the iPad is
@@ -68,6 +109,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // Rebuilt every time it opens so checkmarks are current.
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
+        updateRefreshBadge()
         let statusLine = NSMenuItem(title: host.status, action: nil, keyEquivalent: "")
         statusLine.isEnabled = false
         menu.addItem(statusLine)
@@ -115,6 +157,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(qualityItem)
 
         menu.addItem(.separator())
+        menu.addItem(item(refreshTitle, #selector(refreshIPad)))
         let login = item("Open at Login", #selector(toggleOpenAtLogin))
         login.state = SMAppService.mainApp.status == .enabled ? .on : .off
         menu.addItem(login)

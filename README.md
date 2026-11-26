@@ -66,8 +66,11 @@ The first time only:
 When you unplug, macOS moves the windows back after a few seconds. Nothing else runs in the
 background while the iPad isn't connected, apart from a check for the cable every two seconds.
 
-**Every 7 days** (free Apple ID): if the iPad app won't open, plug in and double-click
-**Refresh iPad.command**. It takes about a minute.
+**Every 7 days** (free Apple ID): plug the iPad in and open **Refresh iPad** (it's in
+Applications; drag it to the Dock to keep it handy). It opens Terminal, renews the iPad app
+and takes about a minute. You can also pick **Refresh iPad App…** in the PortraitPad menu,
+which shows how many days are left. On the last day the PortraitPad Dock icon gets a red **!**.
+The installer creates the Refresh iPad app; **Refresh iPad.command** does the same thing.
 
 To arrange the screen next to your MacBook, use **Arrange Displays…** in the menu. macOS
 remembers the position.
