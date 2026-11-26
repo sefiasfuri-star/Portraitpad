@@ -47,7 +47,8 @@ paired.sort(key=lambda d: (d.get("hardwareProperties", {}).get("deviceType") != 
                            d.get("connectionProperties", {}).get("transportType") != "wired"))
 if paired:
     d = paired[0]
-    print(d["identifier"] + "\t" + d.get("deviceProperties", {}).get("name", "iPad"))
+    udid = d.get("hardwareProperties", {}).get("udid") or "-"
+    print(d["identifier"] + "\t" + udid + "\t" + d.get("deviceProperties", {}).get("name", "iPad"))
 PY
 }
 
@@ -64,12 +65,18 @@ xcodebuild -version >/dev/null 2>&1 || fail "Xcode can't run yet. Open Xcode onc
 ok "$(xcodebuild -version | head -n 1)"
 IPAD=$(find_ipad)
 [ -n "$IPAD" ] || fail "The Mac can't see the iPad. Plug it in with the cable, unlock it, tap Trust if it asks, and run this again."
-DEVICE="${IPAD%%$'\t'*}"
-ok "iPad connected: ${IPAD#*$'\t'}"
+IFS=$'\t' read -r DEVICE UDID IPAD_NAME <<<"$IPAD"
+[ "$UDID" = "-" ] && UDID=""
+ok "iPad connected: $IPAD_NAME"
 
 if [ "$MODE" = "install" ]; then
     step "Getting the latest version"
+    BEFORE=$(git rev-parse HEAD 2>/dev/null)
     git pull --ff-only || echo "(Couldn't update; using the copy you have.)"
+    # Run the new copy of this script if the update changed it.
+    if [ -z "${PP_UPDATED:-}" ] && [ "$(git rev-parse HEAD 2>/dev/null)" != "$BEFORE" ]; then
+        PP_UPDATED=1 exec "$ROOT/scripts/portraitpad.sh" "$MODE"
+    fi
 fi
 
 if ! command -v xcodegen >/dev/null; then
@@ -102,8 +109,11 @@ if [ "$MODE" = "install" ]; then
 fi
 
 step "Building the iPad app"
+# Naming the iPad lets Xcode register it with Apple when the free team has no device yet.
+IOS_DEST='generic/platform=iOS'
+[ -n "$UDID" ] && IOS_DEST="platform=iOS,id=$UDID"
 build -project PortraitPad.xcodeproj -scheme PortraitPad -configuration Release \
-    -destination 'generic/platform=iOS' -derivedDataPath "$BUILD" \
+    -destination "$IOS_DEST" -derivedDataPath "$BUILD" \
     "${SIGNING[@]}" -allowProvisioningDeviceRegistration build \
     || fail "The iPad app didn't build. Send a screenshot of the lines above."
 
