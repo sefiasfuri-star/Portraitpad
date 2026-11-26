@@ -110,6 +110,12 @@ position in System Settings > Displays (Arrange).
 
 ## Troubleshooting
 
+- **Picture only fills half the iPad, with a ⌘ ⌥ ⇧ bar on the side:** that is Apple's Sidecar, not
+  PortraitPad. Tap the bottom button on that bar to disconnect it (or turn the iPad off under
+  Control Center > Screen Mirroring on the Mac), then open PortraitPad on the iPad.
+- **iPad says the app is from an untrusted developer** (after signing in to Xcode again):
+  Settings > General > VPN & Device Management > your Apple ID > Trust.
+
 - **iPad stays on "Waiting for your Mac"**: make sure PortraitPad Host is running (menu
   bar icon), the iPad app is open in front, and the cable is connected. Unplug and
   replug, or try Wi-Fi with both on the same network.
